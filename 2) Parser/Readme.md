@@ -47,3 +47,64 @@ In BNF terminology:
     On the other hand, T_INT (a literal integer token) is a terminal symbol. It isn’t defined by any further rules—it’s a basic building block of the language, recognized directly by the lexer.
 
 The same goes for the math operators like +, -, *, and /. These are also terminal symbols, since the lexer identifies them directly as tokens.
+
+## Recursive Descent Parsing
+Since the grammar for our language is recursive, it makes sense to write a recursive parser. The idea is straightforward: we read in one token, then look ahead to the next token. Based on what we see, we decide what part of the grammar to apply next. This might involve calling a function that calls itself—hence, recursive descent parsing.
+
+In our case, every expression starts with a number. That number may be followed by a math operator (+, -, etc.), and after that, we might either see:
+
+    Just another number, or
+
+    The beginning of a whole new sub-expression.
+
+So how do we handle this with recursion?
+
+We can write some simple pseudo-code for the parser like this:
+
+function expression() {
+  Scan and check that the first token is a number.
+  If it's not, report a syntax error.
+
+  Get the next token.
+  If the token is the end-of-file (T_EOF), return — this is our base case.
+
+  Otherwise, call expression() again.
+}
+
+Let’s walk through this using an example input:
+2 + 3 - 5 T_EOF
+(T_EOF is a special token that marks the end of input.)
+
+We’ll number each call to the expression() function for clarity:
+
+    expression0:
+
+        Scan the 2, it's a number ✔️
+
+        Next token is + — not T_EOF
+
+        Call expression()
+
+            expression1:
+
+                Scan the 3, it's a number ✔️
+
+                Next token is - — not T_EOF
+
+                Call expression()
+
+                    expression2:
+
+                        Scan the 5, it's a number ✔️
+
+                        Next token is T_EOF — base case, return
+
+                Return from expression1
+
+        Return from expression0
+
+So, yes — the recursive function successfully parsed the input: 2 + 3 - 5 T_EOF.
+
+Keep in mind that, so far, this parser only recognizes whether the input follows the grammar. It doesn’t actually do anything with the input (like evaluating the expression). That job is left to semantic analysis, which interprets the meaning.
+
+    (Although you’ll see later that in practice, it’s common to mix syntax analysis and semantic actions together for simplicity and performance.)
