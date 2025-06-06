@@ -108,3 +108,12 @@ So, yes — the recursive function successfully parsed the input: 2 + 3 - 5 T_EO
 Keep in mind that, so far, this parser only recognizes whether the input follows the grammar. It doesn’t actually do anything with the input (like evaluating the expression). That job is left to semantic analysis, which interprets the meaning.
 
     (Although you’ll see later that in practice, it’s common to mix syntax analysis and semantic actions together for simplicity and performance.)
+
+- To Run it on your Linux Machine
+
+  ```
+  gcc -o compiler main.c tokenizer.c intrepreter.c expression.c astone.c globals.c
+  ./compiler input.py
+  ```
+Here is the Output Image
+  ![image](https://github.com/user-attachments/assets/65283483-7811-4bd2-abbb-28770ca672f8)
