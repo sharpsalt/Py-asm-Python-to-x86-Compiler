@@ -1,2 +1,3 @@
 # Py-asm : A Python Compiler written in C to generate Assembly Language Code
-This Particular Repository Contains all the steps on how to build a compiler from Scratch
+
+Py-asm is a Compiler which Implements a subset of Python in C Language in Order to generate Assembly Language(x86) Code.
