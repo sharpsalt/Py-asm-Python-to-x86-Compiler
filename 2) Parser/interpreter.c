@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "ast.h"
 #include "tokenizer.h"
+#include "interpreter.h"
 
 static const char *ASTop[] = {"+", "-", "*", "/"};
 
