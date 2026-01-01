@@ -4,32 +4,36 @@
 
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s filename\n", argv[0]);
+    FILE* input_file = fopen("input.py", "r");
+    if (!input_file) {
+        perror("Error opening input.py");
         return 1;
     }
-
-    FILE *source = fopen(argv[1], "r");
-    if (!source) {
-        perror("Error opening file");
-        return 1;
-    }
-
+    //then humlog lexer ko initlialize krdenge is File se
+    init_lexer(input_file);
+    //Ek token create krenge Token structut ka usseToekinize karenge
     Token token;
     do {
-        token = get_next_token(source);
-        if (token.type == T_EOF) break;
-
-        printf("Token: type=%d, text='%s'", token.type, token.text ? token.text : "NULL");
+        token = get_next_token();
+        printf("Token: %-12s Line: %-3d Col: %-3d", 
+               token_type_to_str(token.type), 
+               token.line, 
+               token.column);
+        
+        if (token.text) {
+            printf(" Text: '%s'", token.text);
+        }
         if (token.type == T_INT) {
-            printf(", intvalue=%d", token.intvalue);
+            printf(" Value: %d", token.intvalue);
+        }
+        else if (token.type == T_FLOAT) {
+            printf(" Value: %f", token.floatvalue);
         }
         printf("\n");
-
-        free((void*)token.text);
+        //Free the token text memory, somtime the compiler give bad response too...
+        if (token.text) free(token.text);
     } while (token.type != T_EOF);
-
-    fclose(source);
+    fclose(input_file);
     return 0;
 }
 
