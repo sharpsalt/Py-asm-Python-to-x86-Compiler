@@ -1,0 +1,3 @@
+gcc -o compiler main.c tokenizer.c interpreter.c expression.c astone.c globals.c gen.c x86codegenerator.c
+./compiler input.py
+
