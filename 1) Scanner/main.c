@@ -1,9 +1,8 @@
+#include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "token.h"
 
-
-int main(int argc, char *argv[]) {
+int main() {
     FILE* input_file = fopen("input.py", "r");
     if (!input_file) {
         perror("Error opening input.py");
@@ -36,7 +35,3 @@ int main(int argc, char *argv[]) {
     fclose(input_file);
     return 0;
 }
-
-//To run it frst go into Scanner and the paste it
-//gcc -o tokenizer main.c tokenizer.c -Wall
-//./tokenizer input.txt
