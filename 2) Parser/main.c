@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include "interpreter.h"
 #include <stdlib.h>
 #include "token.h"
 #include "tokenizer.h"
 #include "globals.h"
-#include "interpreter.h"
 #include "ast.h"
 
 void freeAST(struct ASTNode *node) {

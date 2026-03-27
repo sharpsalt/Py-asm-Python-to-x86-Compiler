@@ -5,6 +5,7 @@
 #include "token.h"
 
 
-union Value interpretAST(struct ASTNode *n);
+
+union Value interpretAST(struct ASTNode *n); 
 
 #endif
