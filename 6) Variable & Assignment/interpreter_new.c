@@ -2,51 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
-#include <string.h>  // NEW: For strdup
+#include <string.h>
 #include "tokenizer.h"
 #include "interpreter.h"
+#include "globals.h"
 
-#define MAX_GLOBALS 100
-static struct {
-    char *name;
-    struct EvalResult value;
-} globals[MAX_GLOBALS];
-static int global_count = 0;
-
-unsigned int hash(const char *str) {
-    unsigned int hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
-    }
-    return hash % MAX_GLOBALS;
-}
-
-int get_or_add_global(const char *name) {
-    unsigned int h = hash(name);
-    for (int i = 0; i < MAX_GLOBALS; i++) {
-        int idx = (h + i) % MAX_GLOBALS;  // Linear probe
-        if (globals[idx].name == NULL) {
-            globals[idx].name = strdup(name);
-            globals[idx].value.type = VT_INT;
-            globals[idx].value.v.intval = 0;  // Default 0
-            global_count++;
-            return idx;
-        }
-        if (strcmp(globals[idx].name, name) == 0) {
-            return idx;
-        }
-    }
-    fprintf(stderr, "Too many globals!\n");
-    exit(1);
-}
-
-static const char *ASTop[] = {"+", "-", "*", "/"};
-
-struct EvalResult interpretAST(struct ASTNode *n) {
+struct EvalResult interpretAST(struct ASTnode *n) {
     struct EvalResult result;
 
-    // Handle print statement
     if (n->op == A_PRINT) {
         struct EvalResult printval = interpretAST(n->left);
         printf("print: ");
@@ -55,10 +18,9 @@ struct EvalResult interpretAST(struct ASTNode *n) {
         } else {
             printf("%d\n", printval.v.intval);
         }
-        return printval;  // Return the printed value
+        return printval;
     }
 
-    // Handle if statement
     if (n->op == A_IF) {
         struct EvalResult condition = interpretAST(n->left);
         int is_true = (condition.type == VT_FLOAT) ? 
@@ -66,56 +28,41 @@ struct EvalResult interpretAST(struct ASTNode *n) {
                      (condition.v.intval != 0);
         
         if (is_true) {
-            // Execute if body (left side of right node)
             if (n->right && n->right->left) {
                 return interpretAST(n->right->left);
             }
         } else {
-            // Execute else body (right side of right node)
             if (n->right && n->right->right) {
                 return interpretAST(n->right->right);
             }
         }
         
-        // Return default result if no body executed
         result.type = VT_INT;
-        result.type = VT_VOID;
-        return result;
+        result.v.intval = 0;
         return result;
     }
 
-    if (n->op == A_INT) {
+    if (n->op == A_INTLIT) {
         result.type = VT_INT;
-        result.v.intval = n->intvalue;
-        return result;
-    }
-    
-    if (n->op == A_FLOAT) {
-        result.type = VT_FLOAT;
-        result.v.floatval = n->floatvalue;
+        result.v.intval = n->v.intvalue;
         return result;
     }
 
     if (n->op == A_IDENT) {
-        int idx = get_or_add_global(n->ident);
-        return globals[idx].value;
+        return Gsym[n->v.id].value;
     }
 
-    // NEW: A_ASSIGN - store to global
     if (n->op == A_ASSIGN) {
         struct EvalResult val = interpretAST(n->right);
-        int idx = get_or_add_global(n->left->ident);  // left is A_IDENT
-        globals[idx].value = val;
-        return val;  // Return assigned value
+        Gsym[n->left->v.id].value = val;
+        return val;
     }
 
-    // Handle statement glue
     if (n->op == A_GLUE) {
-        if (n->left) interpretAST(n->left);   // Execute left statement
-        if (n->right) return interpretAST(n->right);  // Execute right statement and return its value
+        if (n->left) interpretAST(n->left);
+        if (n->right) return interpretAST(n->right);
         result.type = VT_INT;
-        result.type = VT_VOID;
-        return result;
+        result.v.intval = 0;
         return result;
     }
 
